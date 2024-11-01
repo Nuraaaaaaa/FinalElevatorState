@@ -20,9 +20,6 @@ namespace LiftDemo_A
 		bool isClosing = false;
 		bool isOpening = false;
 
-		bool liftAtGround = false;
-		bool liftAtTop = false;
-
 
         int doorMaxOpenWidth;
 		int doorSpeed = 5;
@@ -77,56 +74,51 @@ namespace LiftDemo_A
 
 		public void btn_1_click(object sender, EventArgs e)
 		{
-            
 
-            if (liftAtGround)
-            {
-                lift.SetState(new MovingUpState());
+			// Your logic for handling Button 1 click
+			if (isOpening || doorTimer.Enabled)  // If doors are open or currently opening
+			{
+				CloseDoors();  // Start door-closing process
+				lift.SetState(new MovingUpState());  // Set the elevator's next state
 
-                lift.LiftTimerUp.Start();
-                isClosing = true;
-                doorAuto();
+				lift.LiftTimerUp.Tag = "Start"; // Flag to start moving after doors close
+			}
+			else
+			{
+				// Start moving the elevator directly
+				lift.SetState(new MovingUpState());
+				lift.LiftTimerUp.Start();
+				logEvents("Lift is coming up.");
+			}
+			//lift.LiftTimerDown.Start();
 
-            }
-            else
-            {
-                lift.SetState(new MovingUpState());
+			ButtonG.Enabled = false; // Disable the ground button
 
-                liftAtTop = true;
 
-                lift.LiftTimerUp.Start();
 
-                doorAuto();
-            }
-
-            ButtonG.Enabled = false;
-			logEvents("Lift is moving Up");
 		}
 
 		public void btn_G_click(object sender, EventArgs e)
 		{
-			lift.SetState(new MovingDownState());
-            //doorAuto();
-
-            lift.LiftTimerDown.Start();
-			liftAtGround = true;
-			//liftAtTop = false;
-			if (liftAtTop)
+			if (isOpening)  // If doors are open or currently opening // || doorTimer.Enabled
 			{
+				CloseDoors();  // Start door-closing process
 
+				lift.SetState(new MovingDownState());  // Set the elevator's next state
 
-				isOpening = true;
-
-                doorAuto();
-
+				lift.LiftTimerDown.Tag = "Start"; // Flag to start moving after doors close
 			}
 			else
 			{
-				isClosing = true;
-				doorAuto();
+				// Start moving the elevator directly
+				lift.SetState(new MovingDownState());
+				lift.LiftTimerDown.Start();
+				logEvents("Lift is coming down.");
 			}
 
-            logEvents("Lift is moving Down");
+			this.ButtonOpen.Click += new System.EventHandler(this.btn_Open_Click);
+
+
 		}
 
 		public void liftTimerUp_Tick(object sender, EventArgs e)
@@ -141,162 +133,30 @@ namespace LiftDemo_A
 
 		private void btn_Open_Click(object sender, EventArgs e)
 		{
-			isOpening=true;
-			isClosing=false;
-			doorTimer_down.Start();
-			ButtonClose.Enabled = false;
 
-			logEvents("Lift door is Opening!!!");
+			if (lift._CurrentState is IdleState)
+			{
+				isOpening = true;
+				isClosing = false;
+				doorTimer.Start();
+				ButtonClose.Enabled = false;
+
+
+				logEvents("Lift door is Opening!!!");
+
+			}
 		}
 
 		private void btn_Close_Click(object sender, EventArgs e)
 		{
 			isOpening =false;
 			isClosing=true;
-			doorTimer_up.Start();
+			doorTimer.Start();
 			logEvents("Lift door is Closing");
 		}
 
-		public void doorAuto()
-		{
-			automatic_door.Start();
-		}
 
-		private void automaticDoor_Tick(object sender, EventArgs e)
 
-		{
-			if (MyElevator.Top == GLeftDoor.Location.Y)
-			{
-				if (liftAtGround)
-				{
-					if (GLeftDoor.Left > doorMaxOpenWidth / 2)
-					{
-						GLeftDoor.Left -= doorSpeed;
-						GRightDoor.Left += doorSpeed;
-					}
-					else
-					{
-						doorTimer_down.Stop();
-						liftAtGround = true;
-						liftAtTop = false;
-                        ButtonClose.Enabled = true;
-					}
-				}
-
-				if (isClosing)
-				{
-					if (GLeftDoor.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
-					{
-						GLeftDoor.Left += doorSpeed;
-						GRightDoor.Left -= doorSpeed;
-					}
-					else
-					{
-						doorTimer_down.Stop();
-						liftAtTop = true;
-						liftAtGround= false;
-
-					}
-				}
-			}
-
-			else if (MyElevator.Top == doorLeft_1.Location.Y)
-            {
-				if (liftAtTop)
-				{
-					if (doorLeft_1.Left > doorMaxOpenWidth / 2)
-					{
-						doorLeft_1.Left -= doorSpeed;
-						doorRight_1.Left += doorSpeed;
-					}
-					else
-					{
-						doorTimer_down.Stop();
-						ButtonClose.Enabled = true;
-					}
-				}
-
-				if (isClosing)
-				{
-					if (doorLeft_1.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
-					{
-						doorLeft_1.Left += doorSpeed;
-						doorRight_1.Left -= doorSpeed;
-					}
-					else
-					{
-						doorTimer_down.Stop();
-
-					}
-				}
-			}
-		}
-
-        private void door_Timer_down_Tick(object sender, EventArgs e)
-
-        {
-            if (MyElevator.Top == GLeftDoor.Location.Y)
-            {
-                if (isOpening)
-                {
-                    if (GLeftDoor.Left > doorMaxOpenWidth / 2)
-                    {
-                        GLeftDoor.Left -= doorSpeed;
-                        GRightDoor.Left += doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-                        ButtonClose.Enabled = true;
-                    }
-                }
-
-                if (isClosing)
-                {
-                    if (GLeftDoor.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
-                    {
-                        GLeftDoor.Left += doorSpeed;
-                        GRightDoor.Left -= doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-
-                    }
-                }
-            }
-
-            else if (MyElevator.Top == doorLeft_1.Location.Y)
-            {
-                if (isOpening)
-                {
-                    if (doorLeft_1.Left > doorMaxOpenWidth / 2)
-                    {
-                        doorLeft_1.Left -= doorSpeed;
-                        doorRight_1.Left += doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-                        ButtonClose.Enabled = true;
-                    }
-                }
-
-                if (isClosing)
-                {
-                    if (doorLeft_1.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
-                    {
-                        doorLeft_1.Left += doorSpeed;
-                        doorRight_1.Left -= doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-
-                    }
-                }
-            }
-        }
 
        
         private void buttonAlarm_Click(object sender, EventArgs e)
@@ -313,9 +173,7 @@ namespace LiftDemo_A
                 // Stop all elevator and door timers
                 lift.LiftTimerUp.Stop();
                 lift.LiftTimerDown.Stop();
-                automatic_door.Stop();
-                doorTimer_down.Stop();
-                doorTimer_up.Stop();
+                doorTimer.Stop();
 
                 // Disable buttons to prevent actions during the alarm
                 Button1.Enabled = false;
@@ -363,18 +221,6 @@ namespace LiftDemo_A
             DownArrow.Enabled = true;
             UpArrow.Enabled = true;
 
-            // Restart lift timers based on current lift state
-            if (liftAtGround)
-            {
-                lift.LiftTimerUp.Start();
-            }
-            else if (liftAtTop)
-            {
-                lift.LiftTimerDown.Start();
-            }
-
-            // Re-enable automatic door operations
-            automatic_door.Start();
 
             // Reset alarm button appearance
             AlarmButton.BackColor = SystemColors.Control;
@@ -391,44 +237,101 @@ namespace LiftDemo_A
         }
 
 
-        private void door_Timer_up_Tick(object sender, EventArgs e)
+		public void OpenDoors()
+		{
+			if (lift.MainElevator.Top == doorLeft_1.Location.Y) // Top floor
+			{
+				isOpening = true;
+				isClosing = false;
+				doorTimer.Start();  // Start door timer to open doors on the top floor
+				ButtonClose.Enabled = false;
+				logEvents("Doors are opening at the top floor!");
+			}
+			else if (lift.MainElevator.Location.Y == GLeftDoor.Location.Y) // Ground floor
+			{
+				isOpening = true;
+				isClosing = false;
+				doorTimer.Start();  // Start door timer to open doors on the ground floor
+				ButtonClose.Enabled = false;
+				logEvents("Doors are opening at the ground floor!");
+			}
+		}
 
-        {
-
-
-            if(MyElevator.Top == doorLeft_1.Location.Y)
-            {
-                if (isOpening)
-                {
-                    if (doorLeft_1.Left > doorMaxOpenWidth / 2)
-                    {
-                        doorLeft_1.Left -= doorSpeed;
-                        doorRight_1.Left += doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-                        ButtonClose.Enabled = true;
-                    }
-                }
-
-                if (isClosing)
-                {
-                    if (doorLeft_1.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
-                    {
-                        doorLeft_1.Left += doorSpeed;
-                        doorRight_1.Left -= doorSpeed;
-                    }
-                    else
-                    {
-                        doorTimer_down.Stop();
-
-                    }
-                }
-            }
+		private void CloseDoors()
+		{
+			isOpening = false;
+			isClosing = true;
+			doorTimer.Start();
+			logEvents("Doors are closing!");
+		}
 
 
-        }
+		private void door_Timer_Tick(object sender, EventArgs e)
+		{
+			if (isOpening)
+			{
+				// Open the doors
+				if (MyElevator.Top == doorLeft_1.Location.Y) // Assuming the ground floor is Top = 0
+				{
+					if (doorLeft_1.Left > doorMaxOpenWidth / 2)
+					{
+						doorLeft_1.Left -= doorSpeed;
+						doorRight_1.Left += doorSpeed;
+					}
+					else
+					{
+						doorTimer.Stop();
+						ButtonClose.Enabled = true; // Enable close button
 
-    }
+					}
+				}
+				else // When at floor 1
+				{
+					if (GLeftDoor.Left > doorMaxOpenWidth / 2)
+					{
+						GLeftDoor.Left -= doorSpeed;
+						GRightDoor.Left += doorSpeed;
+					}
+					else
+					{
+						doorTimer.Stop();
+						ButtonClose.Enabled = true; // Enable close button
+
+					}
+				}
+			}
+			else if (isClosing)
+			{
+				// Close the doors
+				if (MyElevator.Top == doorLeft_1.Location.Y) // Assuming the ground floor is Top = 0
+				{
+					if (doorLeft_1.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
+					{
+						doorLeft_1.Left += doorSpeed;
+						doorRight_1.Left -= doorSpeed;
+					}
+					else
+					{
+						doorTimer.Stop();
+						liftTimerDown.Start();
+					}
+				}
+				else // When at floor 1
+				{
+					if (GLeftDoor.Right < MyElevator.Width + doorMaxOpenWidth / 2 - 5)
+					{
+						GLeftDoor.Left += doorSpeed;
+						GRightDoor.Left -= doorSpeed;
+					}
+					else
+					{
+						doorTimer.Stop();
+						liftTimerUp.Start();
+
+					}
+				}
+			}
+		}
+
+	}
 }

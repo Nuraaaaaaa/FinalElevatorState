@@ -11,7 +11,7 @@ namespace LiftDemo_A
 	{
 		public void MovingDown(Lift lift)
 		{
-			if (lift.MainElevator.Top == 0 || lift.MainElevator.Bottom < lift.FormSize)
+			if (lift.MainElevator.Top == lift.DoorLeft.Location.Y || lift.MainElevator.Bottom < lift.FormSize)
 			{
 				lift.MainElevator.Top += lift.LiftSpeed + 10;
 			}
@@ -24,6 +24,9 @@ namespace LiftDemo_A
 				lift.LiftTimerDown.Stop();  // Stop the timer when it reaches the bottom
 				lift.Btn_1.Enabled = true;  // Re-enable the 1st floor button
 				lift.Btn_G.Enabled = true;  // Enable other controls
+
+				((Form1)lift.MainElevator.FindForm()).OpenDoors();
+
 			}
 		}
 

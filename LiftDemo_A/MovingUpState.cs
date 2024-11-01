@@ -30,6 +30,9 @@ namespace LiftDemo_A
 				lift.LiftTimerUp.Stop();  // Stop the timer when it reaches the top
 				lift.Btn_G.Enabled = true;  // Re-enable the G button
 				lift.Btn_1.Enabled = true;  // Enable other controls
+
+				((Form1)lift.MainElevator.FindForm()).OpenDoors();
+
 			}
 		}
 	}

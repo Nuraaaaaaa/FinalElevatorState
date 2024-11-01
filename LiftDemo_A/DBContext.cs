@@ -12,7 +12,7 @@ namespace LiftDemo_A
 	internal class DBContext
 	{
 
-		string connectionString = @"Server = LAPTOP-1HGG9AAR;Database = MyElevatorState; Trusted_Connection = True;";
+		string connectionString = @"Server = VA-OZVSMQR3C0GP\MANISH_RESEARCH;Database = testing; Trusted_Connection = True;";
 
 		public void InsertLogsIntoDB(DataTable dt)
 		{
